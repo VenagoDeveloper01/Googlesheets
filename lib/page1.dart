@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:googlesheets/GooglesheetCode.dart';
 import 'package:googlesheets/Form.dart';
 
+import 'Database/Retrieve.dart';
+import 'Database/sqflite.dart';
+
+
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 
@@ -14,6 +18,9 @@ class _MainScreenState extends State<MainScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController ageController = TextEditingController();
 
+  final dbHelper = DatabaseHelper.instance;
+  late String name,email,age;
+
   void output()
   async
   {
@@ -22,13 +29,13 @@ class _MainScreenState extends State<MainScreen> {
       SheetsColumn.email: emailController.text.trim(),
       SheetsColumn.age: ageController.text.trim(),
 
+
     };
     nameController.clear();
     emailController.clear();
     ageController.clear();
     await SheetsFlutter.insert([feedback]);
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,24 +46,33 @@ class _MainScreenState extends State<MainScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              TextFormField(
+              TextField(
                 controller: nameController,
+                onChanged: (val){
+                  name=val;
+                },
                 decoration: InputDecoration(
                   border:OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                   hintText: 'name',
                 ),
               ),
               const SizedBox(height: 10,),
-              TextFormField(
+              TextField(
                 controller: emailController,
+                onChanged: (val){
+                  email=val;
+                },
                 decoration: InputDecoration(
                   border:OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                   hintText: 'Email',
                 ),
               ),
               const  SizedBox(height: 10),
-              TextFormField(
+              TextField(
                 controller: ageController,
+                onChanged: (val){
+                  age=val;
+                },
                 decoration: InputDecoration(
                   border:OutlineInputBorder(borderRadius: BorderRadius.circular(20)),
                   hintText: 'Age',
@@ -65,25 +81,73 @@ class _MainScreenState extends State<MainScreen> {
               const  SizedBox(height: 10,),
               GestureDetector(
                 onTap: () async {
-                  output();
+                  _insert();
                   setState(()
                   {
-
                     output();
                   });
                 },
-                child: Container(
-                  height: 70,
-                  width: 400,
-                  color: const Color(0x79414165),
-                  child: const Center(child: Text("Save to Data")),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 70,
+                      width: 400,
+                      color: const Color(0x79414165),
+                      child: const Center(child: Text("Save to Data")
+                      ),
+
+                    ),
+                    FlatButton(onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RetrieveData(),
+                        ),
+                      );
+
+                    }, child: Text('show data'),
+                    ),
+                    // FlatButton(onPressed: (){
+                    //   Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //       builder: (context) => RetrieveData(),
+                    //     ),
+                    //   );
+                    //
+                    // }, child: Text('show data'),
+                    // )
+                  ],
+
                 ),
+
               )
             ],
           ),
         ),
-      ),
-    );
+
+        ),
+      );
+
+
   }
 
+  void   _insert() async{
+    Map<String, dynamic> row = {
+      DatabaseHelper.columnName : name,
+      DatabaseHelper.columnAge  : age,
+      DatabaseHelper.columnEmail  : email,
+    };
+
+    final id = await dbHelper.insert(row);
+    print("Id is:   $id" );
+  }
+}
+
+
+
+class Data {
+  String name, email, age;
+
+  Data({required this.name, required this.email, required this.age,});
 }

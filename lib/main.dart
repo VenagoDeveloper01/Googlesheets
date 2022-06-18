@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:googlesheets/page1.dart';
-
 import 'GooglesheetCode.dart';
 
 
 
 void main() async {
-
+  WidgetsFlutterBinding.ensureInitialized();
   await SheetsFlutter.init();
   runApp(MyApp());
 }
